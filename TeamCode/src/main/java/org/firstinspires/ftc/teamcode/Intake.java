@@ -27,10 +27,13 @@ public class Intake extends LinearOpMode {
 
         while (opModeIsActive()) {
             // Run the motor at 30% power (safe test speed)
-
-            if (gamepad1.triangle) {
+            if (gamepad1.x) {
                 testMotor.setPower(0.5);
-            } else {
+            } else if (gamepad1.triangle) {
+                testMotor.setPower(0.75);
+            } else if (gamepad1.b){
+                testMotor.setPower(1);
+            }else {
                 testMotor.setPower(0.0);
             }
 
