@@ -15,6 +15,6 @@ public class TubeMotor {
          return instant(() -> motor.setPower(0));
     }
     public Command on() {
-        return instant(() -> motor.setPower(1));
+        return instant(() -> motor.setPower(.75));
     }
 }

@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Launcher {
     private final DcMotorEx motor;
      public Launcher(HardwareMap hardwareMap){
-         motor = hardwareMap.get(DcMotorEx.class, "shooter_motor");
+         motor = hardwareMap.get(DcMotorEx.class, "launcher_motor");
      }
     public Command off() {
          return instant(() -> motor.setPower(0));
