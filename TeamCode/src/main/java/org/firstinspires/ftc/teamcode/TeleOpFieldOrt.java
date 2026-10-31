@@ -49,6 +49,19 @@ public class TeleOpFieldOrt extends OpMode {
             //shooter off
             launcher.off().schedule();
         }
+
+        if (gamepad1.dpad_right){
+            launcher.toggled().schedule();
+        }
+
+        if (gamepad1.dpadUpWasPressed()){
+            launcher.increase();
+        }
+
+        if (gamepad1.dpadDownWasPressed()){
+            launcher.decrease();
+        }
+
         if (gamepad1.b){
             //tubemotor on
             tubemotor.on().schedule();
@@ -77,9 +90,13 @@ public class TeleOpFieldOrt extends OpMode {
             follower.setPose(cornerPose);//overides our pose
         }
         follower.update();
+        launcher.periodic();
+
         Pose robotPose = follower.pose();// returns a pose object
         telemetry.addData("Robot X", robotPose.x());
         telemetry.addData("Robot Y", robotPose.y());
         telemetry.addData("Robot Heading", Math.toDegrees(robotPose.heading()));
+        telemetry.addData("launcher actual velocity", launcher.getVelocity());
+        telemetry.addData("launcher target velocity", launcher.getTargetVelocity());
     }
 }

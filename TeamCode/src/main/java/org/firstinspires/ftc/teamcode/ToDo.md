@@ -8,6 +8,8 @@
 * ~Initial Launcher subsystem~
 * April Tag Cluster Detection with Limelight
 * Optomize OTOS 
+* Modify launcher to use velocity
+* Allow increase and decrease launcher speed
 
 ## Teleop
 * ~Drive Fast/Slow~
