@@ -5,15 +5,17 @@ import static com.pedropathing.ivy.commands.Commands.instant;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.CommandBuilder;
 import com.pedropathing.ivy.commands.Commands;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Launcher {
     private int velocity = 400;
-    private boolean activated = true;
+    private boolean activated = false;
     private final DcMotorEx motor;
      public Launcher(HardwareMap hardwareMap){
          motor = hardwareMap.get(DcMotorEx.class, "launcher_motor");
+         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      }
     public Command off() {
          return instant(() -> motor.setVelocity(0));

@@ -42,6 +42,7 @@ public class TeleOpFieldOrt extends OpMode {
             //intake off
             intake.off().schedule();
         }
+        /*
         if (gamepad1.dpad_left){
             //shooter on
             launcher.on().schedule();
@@ -50,7 +51,9 @@ public class TeleOpFieldOrt extends OpMode {
             launcher.off().schedule();
         }
 
-        if (gamepad1.dpad_right){
+         */
+
+        if (gamepad1.dpadRightWasPressed()){
             launcher.toggled().schedule();
         }
 
@@ -69,6 +72,7 @@ public class TeleOpFieldOrt extends OpMode {
             //tubemotor off
             tubemotor.off().schedule();
         }
+
         if (gamepad1.right_bumper) {
             speed = ROBOT_FAST;
         }else if (gamepad1.left_bumper) {
