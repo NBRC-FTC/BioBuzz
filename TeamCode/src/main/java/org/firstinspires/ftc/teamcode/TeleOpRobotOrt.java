@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.TubeMotor;
 import org.firstinspires.ftc.teamcode.subsystems.Launcher;
+
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp -Robot Ort")
 public class TeleOpRobotOrt extends OpMode {
 
@@ -39,6 +40,7 @@ public class TeleOpRobotOrt extends OpMode {
             //intake off
             intake.off().schedule();
         }
+        /*
         if (gamepad1.dpad_left){
             //shooter on
             launcher.on().schedule();
@@ -46,6 +48,21 @@ public class TeleOpRobotOrt extends OpMode {
             //shooter off
             launcher.off().schedule();
         }
+
+         */
+
+        if (gamepad1.dpadRightWasPressed()){
+            launcher.toggled().schedule();
+        }
+
+        if (gamepad1.dpadUpWasPressed()){
+            launcher.increase();
+        }
+
+        if (gamepad1.dpadDownWasPressed()){
+            launcher.decrease();
+        }
+
         if (gamepad1.b){
             //tubemotor on
             tubemotor.on().schedule();
@@ -53,6 +70,7 @@ public class TeleOpRobotOrt extends OpMode {
             //tubemotor off
             tubemotor.off().schedule();
         }
+
         if (gamepad1.right_bumper) {
             speed = ROBOT_FAST;
         }else if (gamepad1.left_bumper) {
@@ -67,9 +85,13 @@ public class TeleOpRobotOrt extends OpMode {
         );
 
         follower.update();
+        launcher.periodic();
+
         Pose robotPose = follower.pose();// returns a pose object
         telemetry.addData("Robot X", robotPose.x());
         telemetry.addData("Robot Y", robotPose.y());
         telemetry.addData("Robot Heading", Math.toDegrees(robotPose.heading()));
+        telemetry.addData("launcher actual velocity", launcher.getVelocity());
+        telemetry.addData("launcher target velocity", launcher.getTargetVelocity());
     }
 }
