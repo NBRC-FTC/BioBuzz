@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Launcher {
-    private int velocity = 400;
+    private int velocity = 1160;
     private boolean activated = false;
     private final DcMotorEx motor;
      public Launcher(HardwareMap hardwareMap){

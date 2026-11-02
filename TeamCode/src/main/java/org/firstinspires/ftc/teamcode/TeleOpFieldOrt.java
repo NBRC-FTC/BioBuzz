@@ -90,7 +90,7 @@ public class TeleOpFieldOrt extends OpMode {
 
         // relocalise button
         if (gamepad1.startWasPressed()){
-            Pose cornerPose = new Pose(10.5, 10.5,Math.toRadians(90));
+            Pose cornerPose = new Pose(10.5, 10.5,Math.toRadians(0));
             follower.setPose(cornerPose);//overides our pose
         }
         follower.update();
