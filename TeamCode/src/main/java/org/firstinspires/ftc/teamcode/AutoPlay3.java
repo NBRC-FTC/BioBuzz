@@ -35,6 +35,7 @@ public class AutoPlay3 extends LinearOpMode {
     public Command autoRoutine() {
         return sequential(
                 follow(follower, startingSpot3ToShoot()),
+                waitMs(5000),
                 follow(follower, launchingToLoadingZone())
         );
     }
@@ -53,7 +54,10 @@ public class AutoPlay3 extends LinearOpMode {
             follower.update();
             Scheduler.execute();
 
+            //telemetry.addData("End X", follower.currentPath().endPose().x());
             telemetry.addData("x", follower.pose().x());
+
+            //telemetry.addData("End Y", follower.currentPath().endPose().y());
             telemetry.addData("y", follower.pose().y());
             telemetry.addData("heading", follower.pose().heading());
 

@@ -9,6 +9,7 @@ import com.pedropathing.tuning.autotune.TuningOpMode;
 import com.pedropathing.utils.Angle;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.opencv.core.Mat;
 
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class OTOSTuner extends Procedure {
         );
         Inputs.Field<Double> distance = scalar.d("Distance to push robot").withDefault(48.0);
         Inputs.Field<Integer> turns = scalar.i("Full rotations").withDefault(10);
+        Inputs.Field<Integer> offsetAngle = scalar.i("OTOS offset angle (degrees)").withDefault(0);
+
         awaitInputs(scalar);
 
         if (!(distance.get() > 0.0)) {
@@ -40,10 +43,10 @@ public class OTOSTuner extends Procedure {
             return;
         }
 
-        Double angularScalar = runOpMode(new OTOSAngularScalar(name.get(), turns.get()));
-        Double linearScalar = runOpMode(new OTOSLinearScalar(name.get(), distance.get()));
+        Double angularScalar = runOpMode(new OTOSAngularScalar(name.get(), turns.get(),offsetAngle.get()));
+        Double linearScalar = runOpMode(new OTOSLinearScalar(name.get(), distance.get(),offsetAngle.get()));
 
-        List<Double> offsets = runOpMode(new OTOSOffsets(name.get(), linearScalar, angularScalar));
+        List<Double> offsets = runOpMode(new OTOSOffsets(name.get(), linearScalar, angularScalar, offsetAngle.get()));
         if (offsets == null) {
             abort("Offset stage ended without a saved pose. Rotate the robot 180 degrees about the robot center, then press Stop.");
             return;
@@ -54,12 +57,13 @@ public class OTOSTuner extends Procedure {
         result("angularScalar", angularScalar);
         result("xOffset", offsets.get(0));
         result("yOffset", offsets.get(1));
+        result("headingOffset", offsets.get(2));
 
         code(Language.JAVA,"public static OTOSConfig localizerConfig = new OTOSConfig(c -> {\n" +
                 "    c.name.set(\"" + name.get() + "\");\n" +
                 "    c.linearScalar.set(" + linearScalar + ");\n" +
                 "    c.angularScalar.set(" + angularScalar + ");\n" +
-                "    c.offset.set(new Pose(" + offsets.get(0) + ", " + offsets.get(1) + "));\n" +
+                "    c.offset.set(new Pose(" + offsets.get(0) + ", " + offsets.get(1) + ", " + offsets.get(2) +"));\n" +
                 "    c.linearUnit.set(DistanceUnit.INCH);\n" +
                 "});");
     }
@@ -69,14 +73,16 @@ public class OTOSTuner extends Procedure {
 class OTOSLinearScalar extends TuningOpMode<Double> {
     String name;
     double distance;
+    double offsetAngle;
 
-    public OTOSLinearScalar(String name, double distance) {
+    public OTOSLinearScalar(String name, double distance, double offsetAngle) {
         super("Linear Scalar Identification",
                 "Determines the linear scalar for the OTOS localizer. \n"
                         + "Push your robot forward " + distance + " inches, stop moving, then press Stop",
                 true);
         this.name = name;
         this.distance = distance;
+        this.offsetAngle = offsetAngle;
     }
 
     @Override
@@ -86,7 +92,8 @@ class OTOSLinearScalar extends TuningOpMode<Double> {
             c.linearUnit.set(DistanceUnit.INCH);
             c.linearScalar.set(1.0);
             c.angularScalar.set(1.0);
-            c.offset.set(Pose.zero());
+            c.offset.set(new Pose(-0.0, -0.0,Math.toRadians(offsetAngle)));
+
         });
         OTOSLocalizer localizer = new OTOSLocalizer(hardwareMap, config);
         localizer.setPose(Pose.zero());
@@ -98,11 +105,16 @@ class OTOSLinearScalar extends TuningOpMode<Double> {
         while (!isStopRequested()) {
             localizer.update();
             position = localizer.pose();
+            telemetry.addData("x", localizer.pose().x());
+            telemetry.addData("y", localizer.pose().y());
+            telemetry.addData("heading", Math.toDegrees(localizer.pose().heading()));
+            telemetry.update();
 
 
         }
 
-        if (position == null || Math.abs(position.x()) <= 1e-9) {
+       // if (position == null || Math.abs(position.x()) <= 1e-9) {
+         if (position == null) {
             return null;
         }
 
@@ -114,14 +126,16 @@ class OTOSAngularScalar extends TuningOpMode<Double> {
     String name;
     int turns;
     double targetRadians;
+    double offsetAngle;
 
-    public OTOSAngularScalar(String name, int turns) {
+    public OTOSAngularScalar(String name, int turns ,double offsetAngle) {
         super("Angular Scalar Identification",
                 "Determines the angular scalar for the OTOS localizer. \n"
                         + "Spin your robot " + turns + " full rotations, stop moving, then press Stop",
                 true);
         this.name = name;
         this.turns = turns;
+        this.offsetAngle = offsetAngle;
         this.targetRadians = turns * 2.0 * Math.PI;
     }
 
@@ -132,7 +146,9 @@ class OTOSAngularScalar extends TuningOpMode<Double> {
             c.linearUnit.set(DistanceUnit.INCH);
             c.linearScalar.set(1.0);
             c.angularScalar.set(1.0);
-            c.offset.set(Pose.zero());
+            c.offset.set(new Pose(-0.0, -0.0,Math.toRadians(offsetAngle)));
+            //c.offset.set(Pose.zero());
+
         });
         OTOSLocalizer localizer = new OTOSLocalizer(hardwareMap, config);
         localizer.setPose(Pose.zero());
@@ -152,7 +168,10 @@ class OTOSAngularScalar extends TuningOpMode<Double> {
             totalHeading += Angle.normalizeSigned(currentHeading - prevHeading);
             prevHeading = currentHeading;
 
-
+            telemetry.addData("x", localizer.pose().x());
+            telemetry.addData("y", localizer.pose().y());
+            telemetry.addData("heading", Math.toDegrees(localizer.pose().heading()));
+            telemetry.update();
         }
 
         if (Math.abs(totalHeading) <= 1e-9) {
@@ -165,9 +184,9 @@ class OTOSAngularScalar extends TuningOpMode<Double> {
 
 class OTOSOffsets extends TuningOpMode<List<Double>> {
     String name;
-    double linearScalar, angularScalar;
+    double linearScalar, angularScalar, offsetAngle;
 
-    public OTOSOffsets(String name, double linearScalar, double angularScalar) {
+    public OTOSOffsets(String name, double linearScalar, double angularScalar ,double offsetAngle) {
         super("OTOS Offset Identification",
                 "Automatically identifies the X/Y offset for your OTOS localizer. \n"
                         + "Rotate the robot 180 degrees counterclockwise about the robot center without translating it, stop moving, then press Stop",
@@ -175,6 +194,7 @@ class OTOSOffsets extends TuningOpMode<List<Double>> {
         this.name = name;
         this.linearScalar = linearScalar;
         this.angularScalar = angularScalar;
+        this.offsetAngle = offsetAngle;
     }
 
     @Override
@@ -184,7 +204,9 @@ class OTOSOffsets extends TuningOpMode<List<Double>> {
             c.linearUnit.set(DistanceUnit.INCH);
             c.linearScalar.set(linearScalar);
             c.angularScalar.set(angularScalar);
-            c.offset.set(Pose.zero());
+            c.offset.set(new Pose(-0.0, -0.0,Math.toRadians(offsetAngle)));
+            //c.offset.set(Pose.zero());
+
         });
         OTOSLocalizer localizer = new OTOSLocalizer(hardwareMap, config);
         localizer.setPose(Pose.zero());
@@ -197,7 +219,9 @@ class OTOSOffsets extends TuningOpMode<List<Double>> {
         while (!isStopRequested()) {
             localizer.update();
             position = localizer.pose();
-            telemetry.addData("heading", localizer.pose().heading());
+            telemetry.addData("x", localizer.pose().x());
+            telemetry.addData("y", localizer.pose().y());
+            telemetry.addData("heading", Math.toDegrees(localizer.pose().heading()));
             telemetry.update();
         }
 
@@ -205,6 +229,6 @@ class OTOSOffsets extends TuningOpMode<List<Double>> {
             return null;
         }
 
-        return List.of(-position.x() / 2.0, -position.y() / 2.0);
+        return List.of(-position.x() / 2.0, -position.y() / 2.0, Math.toRadians(offsetAngle));
     }
 }
