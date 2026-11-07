@@ -15,8 +15,11 @@ import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.subsystems.TubeMotor;
 
 @Autonomous(name = "AutoPlay3", group = "Autonomous")
 public class AutoPlay3 extends LinearOpMode {
@@ -26,17 +29,23 @@ public class AutoPlay3 extends LinearOpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose startingPoint = poseFactory.of(58, 9, 90);
-    private final Pose startingSpot3ToShoot = poseFactory.of(57.9542, 24.1461, 90);
-    private final Pose launchingToLoadingZoneStart = poseFactory.of(57.9542, 24.1461, 90);
-    private final Pose launchingToLoadingZone = poseFactory.of(9.3411, 97.4245, 90);
+    //private final Pose startingSpot3ToShoot = poseFactory.of(57.9542, 24.1461, 90);
+    //private final Pose launchingToLoadingZoneStart = poseFactory.of(57.9542, 24.1461, 90);
+    private final Pose loadingZoneB = poseFactory.of(12, 97, 0);
     private final Pose launchingToLoadingZoneControl1 = poseFactory.of(20.456, 23.0935, 0);
+    private Launcher launcher;
+    private TubeMotor tubeMotor;
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                follow(follower, startingSpot3ToShoot()),
-                waitMs(5000),
-                follow(follower, launchingToLoadingZone())
+                launcher.on(),
+                waitMs(1000),
+                tubeMotor.on(),
+                waitMs(3000),
+                launcher.off(),
+                tubeMotor.off(),
+                follow(follower, startingSpotToLoadingZoneB())
         );
     }
 
@@ -46,7 +55,8 @@ public class AutoPlay3 extends LinearOpMode {
         follower = Constants.create(hardwareMap);
         follower.setPose(startingPoint);
         follower.update();
-
+        launcher = new Launcher(hardwareMap);
+        tubeMotor = new TubeMotor(hardwareMap);
         waitForStart();
         schedule(autoRoutine());
 
@@ -70,12 +80,11 @@ public class AutoPlay3 extends LinearOpMode {
         }
     }
 
-    public Path startingSpot3ToShoot() {
-        return Paths.line(startingPoint, startingSpot3ToShoot).linear(startingPoint, startingSpot3ToShoot);
-    }
-
-    public Path launchingToLoadingZone() {
-        return Paths.curve(launchingToLoadingZoneStart, launchingToLoadingZoneControl1, launchingToLoadingZone).linear(launchingToLoadingZoneStart, launchingToLoadingZone);
+  //  public Path startingSpotToLoadingZoneB() {
+       // return Paths.line(startingPoint, startingSpot3ToShoot).linear(startingPoint, startingSpot3ToShoot);
+  //  }
+    public Path startingSpotToLoadingZoneB() {
+        return Paths.curve(startingPoint, launchingToLoadingZoneControl1, loadingZoneB).linear(startingPoint, loadingZoneB);
     }
 }
 

@@ -1,14 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+@Disabled
 
 @TeleOp(name = "Motor Test")
 public class IntakeTeleOp extends LinearOpMode {
 
     private DcMotor testMotor;
-
     @Override
     public void runOpMode() {
         // Must match the exact name given in the Robot Controller configuration file

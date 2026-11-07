@@ -26,7 +26,7 @@ public class AutoPlay1 extends LinearOpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(8.0509, 135.4756, 0);
-    private final Pose startingSpot1ToLoadingZoneA = poseFactory.of(8.7309, 112.4495, 0);
+    private final Pose startingSpot1ToLoadingZoneA = poseFactory.of(8.7309, 120.4495, 0);
 
     // Autonomous routine
     public Command autoRoutine() {
