@@ -40,7 +40,7 @@ public class AutoPlay3 extends LinearOpMode {
     public Command autoRoutine() {
         return sequential(
                 launcher.on(),
-                waitMs(1000),
+                waitMs(3000),
                 tubeMotor.on(),
                 waitMs(3000),
                 launcher.off(),
