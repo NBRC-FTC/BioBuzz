@@ -21,7 +21,7 @@ public class AprilTagWebcam {
     private List<AprilTagDetection> detectedTags = new ArrayList<>();
     private Telemetry telemetry;
 
-    public void init(HardwareMap hwMap, Telemetry telemetry) {
+    public AprilTagWebcam(HardwareMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
@@ -71,36 +71,46 @@ public class AprilTagWebcam {
 */
  public void telemetryAprilTag() {
 
-     List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
-     telemetry.addData("# AprilTags Detected", currentDetections.size());
+     //List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
+     telemetry.addData("# AprilTags Detected", detectedTags.size());
 
      // Step through the list of detections and display info for each one.
-     for (AprilTagDetection detection : currentDetections) {
+     for (AprilTagDetection detection : detectedTags) {
+         if (detection instanceof AprilTagClusterDetection) {
 
-         AprilTagClusterDetection clusterDet = (AprilTagClusterDetection) detection;
-         telemetry.addLine(String.format("\n==== Tag Cluster (%s)", clusterDet.metadata.name));
-         telemetry.addLine(String.format("Percent tags found: %d", clusterDet.percentClusterFound));
-         telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-         telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
-         telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+             AprilTagClusterDetection clusterDet = (AprilTagClusterDetection) detection;
+             telemetry.addLine(String.format("\n==== Tag Cluster (%s)", clusterDet.metadata.name));
+             telemetry.addLine(String.format("Percent tags found: %d", clusterDet.percentClusterFound));
+             //telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+             //telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+             //telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+             telemetry.addData("Roll",  "%5.1f degrees", clusterDet.ftcPose.roll);
+             telemetry.addData("Range",  "%5.1f inches", clusterDet.ftcPose.range);
+             telemetry.addData("Bearing",  "%5.1f degrees", clusterDet.ftcPose.bearing);
+             telemetry.addData("Yaw",  "%5.1f degrees", clusterDet.ftcPose.yaw);
 
+         }
      }   // end for() loop
 
-     // Add "key" information to telemetry
-     telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
-     telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
-     telemetry.addLine("RBE = Range, Bearing & Elevation");
-
  }   // end method telemetryAprilTag()
-  /*  public AprilTagDetection getTagBySpecificId(int id) {
+
+    public AprilTagDetection getGoodTag(String color){
         for (AprilTagDetection detection : detectedTags) {
-            if (detection.id == id){
-                return detection;
+            if (detection instanceof AprilTagClusterDetection) {
+
+                AprilTagClusterDetection clusterDet = (AprilTagClusterDetection) detection;
+                if (clusterDet.metadata.name.contains(color)) {
+
+                    if (clusterDet.ftcPose.roll < 90 && clusterDet.ftcPose.roll > -90) {
+
+                        return detection;
+                    }
+                }
             }
         }
         return null;
     }
-*/
+
     public void stop() {
         if (visionPortal != null) {
             visionPortal.close();
